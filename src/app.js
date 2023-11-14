@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const postRoutes = require("../src/api/route/postRoutes");
+const hostname = "0.0.0.0";
 
 const port = 5555;
 const app = express();
@@ -22,8 +23,8 @@ mongoose
     console.log("Database connected");
 
     // Start the server after successful database connection
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
+    app.listen(port, hostname, () => {
+      console.log(`Example app listening on port ${port}`);
     });
   })
   .catch((err) => {

@@ -85,3 +85,20 @@ exports.deleteFile = async (req, res) => {
     });
   }
 };
+
+exports.getAFile = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    res.status(200).json({
+      status: "success",
+      data: {
+        post,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      message: err,
+    });
+  }
+};
