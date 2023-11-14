@@ -16,15 +16,16 @@ app.get("/", (req, res) => {
 });
 
 // Connect to MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/exo-node")
+mongoose
+  .connect("mongodb://127.0.0.1:27017/exo-node")
   .then(() => {
     console.log("Database connected");
 
     // Start the server after successful database connection
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Database connection failed", err);
   });
