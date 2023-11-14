@@ -15,7 +15,7 @@ exports.getAllcommentsForPost = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({
-      status: "fail",
+      status: "fail comment not found",
       message: err,
     });
   }
@@ -29,14 +29,14 @@ exports.createCommentForPost = async (req, res) => {
   try {
     const comments = await Comment.create({ name, message, post: id });
     res.status(200).json({
-      status: "success",
+      status: "success comment created",
       data: {
         comments,
       },
     });
   } catch (err) {
     res.status(500).json({
-      status: "fail",
+      status: "fail comment not created",
       message: err,
     });
   }
@@ -55,11 +55,13 @@ exports.updateAComment = async (req, res) => {
         runValidators: true,
       }
     );
+    if (!comment) {
+      res.status(404).json({
+        status: "fail comment not found",
+      });
+    }
     res.status(200).json({
-      status: "succes",
-      data: {
-        comment,
-      },
+      status: "succes comment updated",
     });
   } catch (err) {
     res.status(500).json({
@@ -74,11 +76,11 @@ exports.deleteAComment = async (req, res) => {
   try {
     const comment = await Comment.findByIdAndDelete(id);
     res.status(200).json({
-      status: "success",
+      status: "success comment deleted",
     });
   } catch (err) {
     res.status(500).json({
-      status: "fail",
+      status: "fail comment not deleted",
       message: err,
     });
   }
@@ -89,14 +91,14 @@ exports.getAComment = async (req, res) => {
   try {
     const comment = await Comment.findById(id);
     res.status(200).json({
-      status: "success",
+      status: "success comment found",
       data: {
         comment,
       },
     });
   } catch (err) {
     res.status(500).json({
-      status: "fail",
+      status: "fail comment not found",
       message: err,
     });
   }

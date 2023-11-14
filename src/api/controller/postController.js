@@ -50,14 +50,14 @@ exports.updateFile = async (req, res) => {
     }
 
     res.status(200).json({
-      status: "success",
+      status: "success post updated",
       data: {
         post,
       },
     });
   } catch (err) {
     res.status(400).json({
-      status: "fail",
+      status: "fail ",
       message: err,
     });
   }
