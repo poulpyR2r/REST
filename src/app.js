@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
 });
 
 // Connect to MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/compteRendu")
+mongoose.connect("mongodb://127.0.0.1:27017/exo-node")
   .then(() => {
     console.log("Database connected");
 
