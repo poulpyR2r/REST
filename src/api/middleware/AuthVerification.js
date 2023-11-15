@@ -1,42 +1,34 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const User = require("../model/userModel");
 
-// Middleware function to verify JWT token
 const verifyToken = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (authHeader) {
-        const token = authHeader.split(' ')[1];
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) {
-                return res.sendStatus(403);
-            }
-            req.user = user;
-            next();
-        });
-    } else {
-        res.sendStatus(401);
-    }
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ message: "Missing authorization header" });
+  }
+  const token = authHeader.split(" ")[1];
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    req.userData = { userId: decodedToken.userId, email: decodedToken.email };
+    next();
+  } catch (error) {
+    console.error("Error verifying token:", error.message);
+    res.status(401).json({ message: "Invalid token" });
+  }
 };
 
-// Middleware function to verify if user is an admin
-const verifyAdmin = (req, res, next) => {
-    if (req.user.role === 'admin') {
-        next();
-    } else {
-        res.sendStatus(403);
+const verifyAdmin = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ _id: req.userData.userId });
+    console.log(user.role);
+    if (user.role !== "admin") {
+      return res.status(401).json({ message: "Unauthorized" });
     }
+    return next();
+  } catch (error) {
+    console.error("Error verifying admin:", error.message);
+    res.status(401).json({ message: "Invalid token" });
+  }
 };
 
-// Middleware function to verify if user is a regular user
-const verifyUser = (req, res, next) => {
-    if (req.user.role === 'user') {
-        next();
-    } else {
-        res.sendStatus(403);
-    }
-};
-
-module.exports = {
-    verifyToken,
-    verifyAdmin,
-    verifyUser
-};
+module.exports = { verifyToken, verifyAdmin };

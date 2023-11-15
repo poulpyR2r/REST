@@ -1,41 +1,57 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const User = require("../model/userModel");
 
+require("dotenv").config();
 exports.registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
-
   try {
-    const user = await User.create({ name, email, password });
-    res.status(200).json({
-      status: "success user created",
-      data: {
-        user,
-      },
+    const { name, email, password } = req.body;
+    const userExists = await verificationIfUserExists(email);
+    if (userExists) {
+      return res.status(400).send({ message: "User already exists" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
     });
-  } catch (err) {
-    res.status(500).json({
-      status: "fail user not created",
-      message: err,
+    const createdUser = await user.save();
+    res.send({
+      _id: createdUser._id,
+      name: createdUser.name,
+      email: createdUser.email,
+      isAdmin: createdUser.isAdmin,
     });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
   }
 };
 
 exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
   try {
-    const response = await User.find({ email, password });
-    if (!response) {
-      return res.status(404).json({
-        status: "fail",
-        message: "User not found",
-      });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).send({ message: "User not found" });
     }
-  } catch (error) {
-    res.status(500).json({
-      status: "fail ",
-      message: error,
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).send({ message: "Invalid password" });
+    }
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+    res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      token,
     });
+  } catch (error) {
+    console.error("Error authenticating user:", error.message);
+    return res.status(500).send({ message: error.message });
   }
 };
-
-exports.lougoutUser = async (req, res) => {};
