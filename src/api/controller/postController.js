@@ -1,4 +1,6 @@
+const { response } = require("express");
 const Post = require("../model/postModel");
+const textApiProvider = require("../provider/textApiProvider");
 
 exports.getFiles = async (req, res) => {
   try {
@@ -19,8 +21,26 @@ exports.getFiles = async (req, res) => {
 };
 
 exports.createFile = async (req, res) => {
+  let randomText;
   try {
-    const newPost = await Post.create(req.body);
+    randomText = await textApiProvider.getLoremIpsum();
+    if (!randomText) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Failed to retrieve random text",
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      status: "error",
+      message: "Error fetching random text",
+    });
+  }
+
+  const { title, author } = req.body;
+
+  try {
+    const newPost = await Post.create({ title, content: randomText, author });
     res.status(201).json({
       status: "success",
       data: {
@@ -30,7 +50,7 @@ exports.createFile = async (req, res) => {
   } catch (err) {
     res.status(400).json({
       status: "fail",
-      message: err,
+      message: err.message,
     });
   }
 };

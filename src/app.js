@@ -7,13 +7,17 @@ const hostname = "0.0.0.0";
 
 const port = 3000;
 const app = express();
+
+// swagger :
+
+
 // docker
-mongoose.connect("mongodb://mongo/apinode");
+// mongoose.connect("mongodb://mongo/apinode");
 
 // local
-// mongoose
-//   .connect("mongodb://127.0.0.1:27017/apinode")
-//   .then(() => console.log("MongoDB Connected"));
+mongoose
+  .connect("mongodb://127.0.0.1:27017/apinode")
+  .then(() => console.log("MongoDB Connected"));
 
 app.use(cors());
 app.use(express.json());

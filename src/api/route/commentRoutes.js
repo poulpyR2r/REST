@@ -9,11 +9,17 @@ const {
   getAComment,
 } = require("../controller/commentsController");
 
-router.get("/get/:id_post", getAllcommentsForPost);
-router.post("/create/:id_post", createCommentForPost);
+const {
+  verifyToken,
+  verifyAdmin,
+  verifyUser,
+} = require("../middleware/AuthVerification");
 
-router.put("/patch/:id_comment", updateAComment);
-router.delete("/delete/:id_comment", deleteAComment);
-router.get("/getacomment/:id_comment", getAComment);
+router.get("/get/:id_post", verifyToken, getAllcommentsForPost);
+router.post("/create/:id_post", verifyToken, createCommentForPost);
+
+router.put("/patch/:id_comment", verifyToken, updateAComment);
+router.delete("/delete/:id_comment", verifyToken, deleteAComment);
+router.get("/getacomment/:id_comment", verifyToken, getAComment);
 
 module.exports = router;
