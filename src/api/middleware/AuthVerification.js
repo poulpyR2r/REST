@@ -1,34 +1,74 @@
 const jwt = require("jsonwebtoken");
-const User = require("../model/userModel");
+require("dotenv").config();
+const jwtkey = process.env.JWT_SECRET;
 
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).json({ message: "Missing authorization header" });
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    req.userData = { userId: decodedToken.userId, email: decodedToken.email };
-    next();
-  } catch (error) {
-    console.error("Error verifying token:", error.message);
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
+// exports.verifyToken = async (req, res, next) => {
+//   try {
+//     const token = req.headers["authorization"];
+//     if (token !== undefined) {
+//       const payload = await new Promise((resolve, reject) => {
+//         jwt.verify(token, jwtkey, (error, decoded) => {
+//           if (error) return reject(error);
+//           resolve(decoded);
+//         });
+//       });
+//       req.user = payload;
+//       next();
+//     } else {
+//       res.status(403).json({
+//         status: "fail",
+//         message: "token manquant",
+//       });
+//     }
+//   } catch (error) {
+//     res.status(403).json({
+//       status: "fail",
+//       message: "token invalid",
+//     });
+//   }
+// };
 
-const verifyAdmin = async (req, res, next) => {
+// exports.verifyToken = (req, res, next) => {
+//   const authHeader = req.headers.authorization;
+
+//   if (!authHeader) {
+//     return res.status(401).json({ message: "Missing authorization header" });
+//   }
+//   if (authHeader) {
+//     const token = authHeader.split(" ")[1];
+//     req.token = token;
+//     console.log(token);  }
+//   try {
+//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+//     req.userData = { userId: decodedToken.userId, email: decodedToken.email };
+//     next();
+//   } catch (error) {
+//     console.error("Error verifying token:", error.message);
+//     res.status(401).json({ message: "Invalid token" });
+//   }
+// };
+
+exports.verifyToken = async (req, res, next) => {
   try {
-    const user = await User.findOne({ _id: req.userData.userId });
-    console.log(user.role);
-    if (user.role !== "admin") {
-      return res.status(401).json({ message: "Unauthorized" });
+    const token = req.headers["authorization"];
+    console.log(jwtkey);
+    if (token !== undefined) {
+      const payload = await new Promise((resolve, reject) => {
+        jwt.verify(token, jwtkey, (error, decoded) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(decoded);
+          }
+        });
+      });
+      req.user = payload;
+      next();
+    } else {
+      res.status(403).json({ message: "Accès interdit: token manquant" });
     }
-    return next();
   } catch (error) {
-    console.error("Error verifying admin:", error.message);
-    res.status(401).json({ message: "Invalid token" });
+    console.log(error);
+    res.status(403).json({ message: "Accès interdit: token invalide" });
   }
 };
-
-module.exports = { verifyToken, verifyAdmin };

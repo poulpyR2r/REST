@@ -3,6 +3,7 @@ const Post = require("../model/postModel");
 const textApiProvider = require("../provider/textApiProvider");
 
 exports.getFiles = async (req, res) => {
+  
   try {
     const posts = await Post.find();
     res.status(200).json({

@@ -25,7 +25,6 @@ exports.createCommentForPost = async (req, res) => {
   const id = req.params.id_post;
   const { name, message } = req.body;
 
-  console.log(req.body);
   try {
     const comments = await Comment.create({ name, message, post: id });
     res.status(200).json({
